@@ -24,23 +24,43 @@ import rx.functions.Action1;
  */
 public class ReverseGeocodeLocationService {
 
-    public static Observable<String> getCurrentZip(final Context context, final LocationManager locationManager, final Geocoder geocoder) {
+    private final Context _context;
+    private final LocationManager _locationManager;
+    private final Geocoder _geocoder;
+
+    public ReverseGeocodeLocationService(Context context, LocationManager locationManager, Geocoder geocoder) {
+        _context = context;
+        _locationManager = locationManager;
+        _geocoder = geocoder;
+    }
+
+    public Observable<String> getCurrentZip() {
         return Observable.create(new Observable.OnSubscribe<String>() {
             @Override
             public void call(final Subscriber<? super String> subscriber) {
-                if (!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                if (!_locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
                     subscriber.onError(new Exception("GPS turned off"));
                 } else {
-                    int permissionCheck = ContextCompat.checkSelfPermission(context,
+                    int permissionCheck = ContextCompat.checkSelfPermission(_context,
                             Manifest.permission.ACCESS_FINE_LOCATION);
                     if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
-                        locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, new LocationListener() {
+                        _locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, new LocationListener() {
                             @Override
                             public void onLocationChanged(Location location) {
                                 try {
-                                    Observable.from(geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1)).take(1).subscribe(new Action1<Address>() {
+                                    Observable.from(_geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1)).take(1).subscribe(new Subscriber<Address>() {
                                         @Override
-                                        public void call(Address address) {
+                                        public void onCompleted() {
+
+                                        }
+
+                                        @Override
+                                        public void onError(Throwable e) {
+                                            subscriber.onError(e);
+                                        }
+
+                                        @Override
+                                        public void onNext(Address address) {
                                             subscriber.onNext(address.getPostalCode());
                                             subscriber.onCompleted();
                                         }

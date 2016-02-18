@@ -5,6 +5,7 @@ import android.content.Context;
 import android.location.Geocoder;
 import android.location.LocationManager;
 
+import com.example.rxandroid.ReverseGeocodeLocationService;
 import com.example.rxandroid.api.RepresentativeApi;
 import com.example.rxandroid.api.WhoIsMyRep;
 
@@ -38,6 +39,12 @@ public class AppModule {
     @Singleton
     Geocoder provideGeocoder() {
         return new Geocoder(_context);
+    }
+
+    @Provides
+    @Singleton
+    ReverseGeocodeLocationService provideReverseGeocoderService(LocationManager locationManager, Geocoder geocoder) {
+        return new ReverseGeocodeLocationService(_context,locationManager,geocoder);
     }
 
     @Provides

@@ -2,13 +2,10 @@ package com.example.rxandroid;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.location.Geocoder;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -25,6 +22,7 @@ import android.widget.EditText;
 import com.example.rxandroid.api.Representative;
 import com.example.rxandroid.api.RepresentativeAdapter;
 import com.example.rxandroid.api.RepresentativeApi;
+import com.example.rxandroid.error.MissingLocationPermissionException;
 import com.example.rxandroid.util.ProgressObservable;
 import com.trello.rxlifecycle.ActivityEvent;
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
@@ -56,10 +54,7 @@ public class FunnyRepresentativesActivity extends RxAppCompatActivity {
     @Bind(R.id.loadingProgress) SmoothProgressBar progressBar;
 
     @Inject
-    LocationManager locationManager;
-
-    @Inject
-    Geocoder geocoder;
+    ReverseGeocodeLocationService _reverseGeocodeLocationService;
 
     @Inject
     RepresentativeApi representativeApi;
@@ -109,8 +104,7 @@ public class FunnyRepresentativesActivity extends RxAppCompatActivity {
     @OnClick(R.id.look_up_zip_button)
     void onAutoFindButtonClicked() {
 
-        Observable<String> zipObservable = ReverseGeocodeLocationService
-                .getCurrentZip(FunnyRepresentativesActivity.this, locationManager, geocoder);
+        Observable<String> zipObservable = _reverseGeocodeLocationService.getCurrentZip();
 
         ProgressObservable
             .fromObservable(zipObservable, this, "Finding Zip Code", "Please Wait…", true, true)
@@ -124,9 +118,13 @@ public class FunnyRepresentativesActivity extends RxAppCompatActivity {
 
                 @Override
                 public void onError(Throwable e) {
-                    new AlertDialog.Builder(FunnyRepresentativesActivity.this)
-                            .setTitle("Error!")
-                            .setMessage(e.getMessage()).create().show();
+                    if (e instanceof MissingLocationPermissionException) {
+                        showLocationPermissionExplanation();
+                    } else {
+                        new AlertDialog.Builder(FunnyRepresentativesActivity.this)
+                                .setTitle("Error!")
+                                .setMessage(e.getMessage()).create().show();
+                    }
                 }
 
                 @Override
@@ -160,7 +158,7 @@ public class FunnyRepresentativesActivity extends RxAppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE && grantResults.length > 0
             && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//            getZipCode();
+            onAutoFindButtonClicked();
         }
     }
 
