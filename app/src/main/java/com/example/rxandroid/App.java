@@ -2,6 +2,7 @@ package com.example.rxandroid;
 
 import android.app.Application;
 
+import com.example.rxandroid.di.component.Graph;
 import com.example.rxandroid.di.component.SampleAppComponent;
 
 import timber.log.Timber;
@@ -11,17 +12,21 @@ import timber.log.Timber;
  */
 public class App extends Application {
 
-    private SampleAppComponent _component;
+    private Graph _component;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Timber.plant(new Timber.DebugTree());
 
-        _component = SampleAppComponent.Initializer.init(this);
+        _component = createComponent();
     }
 
-    public SampleAppComponent getComponent() {
+    protected Graph createComponent() {
+        return SampleAppComponent.Initializer.init(this);
+    }
+
+    public Graph getComponent() {
         return _component;
     }
 }
