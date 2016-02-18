@@ -32,6 +32,8 @@ import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -57,13 +59,17 @@ public class FunnyRepresentativesActivity extends RxAppCompatActivity {
     SmoothProgressBar progressBar;
     private RepresentativeAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
-    private RepresentativeApi representativeApi;
     private LocationManager locationManager;
     private Geocoder geocoder;
+
+    @Inject
+    RepresentativeApi representativeApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ((App)getApplication()).getComponent().inject(this);
+
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
@@ -72,8 +78,6 @@ public class FunnyRepresentativesActivity extends RxAppCompatActivity {
         resultList.setLayoutManager(layoutManager);
         adapter = new RepresentativeAdapter();
         resultList.setAdapter(adapter);
-
-        representativeApi = new RepresentativeApi();
 
         _subscriptions = new CompositeSubscription();
 
