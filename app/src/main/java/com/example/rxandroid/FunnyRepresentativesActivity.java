@@ -51,19 +51,22 @@ import static com.example.rxandroid.util.ContentObservable.fromBroadcast;
 
 public class FunnyRepresentativesActivity extends RxAppCompatActivity {
 
-    public static final int LOCATION_PERMISSION_REQUEST_CODE = 100;
-    private CompositeSubscription _subscriptions;
     @Bind(R.id.searchField) EditText searchField;
     @Bind(R.id.resultList) RecyclerView resultList;
-    @Bind(R.id.loadingProgress)
-    SmoothProgressBar progressBar;
-    private RepresentativeAdapter adapter;
-    private RecyclerView.LayoutManager layoutManager;
-    private LocationManager locationManager;
-    private Geocoder geocoder;
+    @Bind(R.id.loadingProgress) SmoothProgressBar progressBar;
+
+    @Inject
+    LocationManager locationManager;
+
+    @Inject
+    Geocoder geocoder;
 
     @Inject
     RepresentativeApi representativeApi;
+
+    public static final int LOCATION_PERMISSION_REQUEST_CODE = 100;
+    private CompositeSubscription _subscriptions;
+    private RepresentativeAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +77,7 @@ public class FunnyRepresentativesActivity extends RxAppCompatActivity {
         ButterKnife.bind(this);
 
         resultList.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         resultList.setLayoutManager(layoutManager);
         adapter = new RepresentativeAdapter();
         resultList.setAdapter(adapter);
@@ -96,8 +99,6 @@ public class FunnyRepresentativesActivity extends RxAppCompatActivity {
                 .compose(this.<Intent>bindToLifecycle())
                 .subscribe(onConnectivityChanged());
 
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        geocoder = new Geocoder(this);
     }
 
     @Override

@@ -18,7 +18,7 @@ public class App extends Application {
         super.onCreate();
         Timber.plant(new Timber.DebugTree());
 
-        _component = SampleAppComponent.Initializer.init();
+        _component = SampleAppComponent.Initializer.init(this);
     }
 
     public SampleAppComponent getComponent() {

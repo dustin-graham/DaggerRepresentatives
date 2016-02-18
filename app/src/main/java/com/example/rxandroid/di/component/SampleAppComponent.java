@@ -1,5 +1,7 @@
 package com.example.rxandroid.di.component;
 
+import android.app.Application;
+
 import com.example.rxandroid.di.module.AppModule;
 
 import javax.inject.Singleton;
@@ -13,8 +15,10 @@ import dagger.Component;
 @Component(modules = {AppModule.class})
 public interface SampleAppComponent extends Graph {
     final class Initializer {
-        public static SampleAppComponent init() {
-            return DaggerSampleAppComponent.builder().build();
+        public static SampleAppComponent init(Application application) {
+            return DaggerSampleAppComponent.builder()
+                    .appModule(new AppModule(application))
+                    .build();
         }
     }
 }

@@ -1,8 +1,5 @@
 package com.example.rxandroid.api;
 
-import retrofit2.GsonConverterFactory;
-import retrofit2.Retrofit;
-import retrofit2.RxJavaCallAdapterFactory;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
@@ -14,21 +11,15 @@ import rx.functions.Func2;
  */
 public class RepresentativeApi {
 
-    private WhoIsMyRep api;
+    private final WhoIsMyRep _api;
     private int flakyRepRequestCount = 0;
 
-    public RepresentativeApi() {
-        Retrofit restAdapter = new Retrofit.Builder()
-                .baseUrl("http://whoismyrepresentative.com/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .build();
-
-        api = restAdapter.create(WhoIsMyRep.class);
+    public RepresentativeApi(WhoIsMyRep api) {
+        this._api = api;
     }
 
     public Observable<Representative> representativesByZipCode(String zip) {
-        return api.searchAllByZip(zip).flatMap(new Func1<ApiResult, Observable<? extends Representative>>() {
+        return _api.searchAllByZip(zip).flatMap(new Func1<ApiResult, Observable<? extends Representative>>() {
             @Override
             public Observable<? extends Representative> call(ApiResult apiResult) {
                 return Observable.from(apiResult.results);
@@ -62,7 +53,7 @@ public class RepresentativeApi {
                 if (flakyRepRequestCount % 2 == 0) {
                     subscriber.onError(new Exception("service flaked out, sorry"));
                 } else {
-                    api.searchAllByZip(zip).flatMap(new Func1<ApiResult, Observable<? extends Representative>>() {
+                    _api.searchAllByZip(zip).flatMap(new Func1<ApiResult, Observable<? extends Representative>>() {
                         @Override
                         public Observable<? extends Representative> call(ApiResult apiResult) {
                             return Observable.from(apiResult.results);
